@@ -20,9 +20,9 @@ require 'fluent_plugin_kinesis/version'
 Gem::Specification.new do |spec|
   spec.name          = "fluent-plugin-kinesis-modified"
   spec.version       = FluentPluginKinesis::VERSION
-  spec.author        = 'Amazon Web Services'
-  spec.summary       = %q{Fluentd output plugin that sends events to Amazon Kinesis.}
-  spec.homepage      = "https://github.com/awslabs/aws-fluent-plugin-kinesis"
+  spec.author        = 'iHandy'
+  spec.summary       = %q{Fluentd output plugin that sends events to Amazon Kinesis. Forked from fluent-plugin-kinesis version 3.1.0}
+  spec.homepage      = "https://github.com/BlackNight95/aws-fluent-plugin-kinesis/tree/feature_modified_aggregation"
   spec.license       = "Apache-2.0"
 
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }

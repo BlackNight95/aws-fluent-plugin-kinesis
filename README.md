@@ -2,14 +2,15 @@
 
 [![Gitter](https://badges.gitter.im/awslabs/aws-fluent-plugin-kinesis.svg)](https://gitter.im/awslabs/aws-fluent-plugin-kinesis?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 [![Build Status](https://travis-ci.org/awslabs/aws-fluent-plugin-kinesis.svg?branch=master)](https://travis-ci.org/awslabs/aws-fluent-plugin-kinesis)
-[![Gem Version](https://badge.fury.io/rb/fluent-plugin-kinesis.svg)](https://rubygems.org/gems/fluent-plugin-kinesis)
+[![Gem Version](https://badge.fury.io/rb/fluent-plugin-kinesis.svg)](https://rubygems.org/gems/fluent-plugin-kinesis-modified)
 
 [Fluentd][fluentd] output plugin
-that sends events to [Amazon Kinesis Data Streams][streams] and [Amazon Kinesis Data Firehose][firehose]. Also it supports [KPL Aggregated record format][kpl]. This gem includes three output plugins respectively:
+that sends events to [Amazon Kinesis Data Streams][streams] and [Amazon Kinesis Data Firehose][firehose]. Also it supports [KPL Aggregated record format][kpl]. This gem includes four output plugins respectively:
 
 - `kinesis_streams`
 - `kinesis_firehose`
 - `kinesis_streams_aggregated`
+- `kinesis_streams_aggregated_modified`
 
 Also, there is a [documentation on Fluentd official site][fluentd-doc-kinesis].
 
@@ -18,17 +19,17 @@ Also, there is a [documentation on Fluentd official site][fluentd-doc-kinesis].
 ## Installation
 This Fluentd plugin is available as the `fluent-plugin-kinesis` gem from RubyGems.
 
-    gem install fluent-plugin-kinesis
+    gem install fluent-plugin-kinesis-modified
 
 Or you can install this plugin for [td-agent][td-agent] as:
 
-    td-agent-gem install fluent-plugin-kinesis
+    td-agent-gem install fluent-plugin-kinesis-modified
 
 If you would like to build by yourself and install, please see the section below. Your need [bundler][bundler] for this.
 
 In case of using with Fluentd: Fluentd will be also installed via the process below.
 
-    git clone https://github.com/awslabs/aws-fluent-plugin-kinesis.git
+    git clone -b feature_modified_aggregation --single-branch https://github.com/BlackNight95/aws-fluent-plugin-kinesis.git
     cd aws-fluent-plugin-kinesis
     bundle install
     bundle exec rake build
@@ -36,15 +37,15 @@ In case of using with Fluentd: Fluentd will be also installed via the process be
 
 Also, you can use this plugin with td-agent: You have to install td-agent before installing this plugin.
 
-    git clone https://github.com/awslabs/aws-fluent-plugin-kinesis.git
+    git clone -b feature_modified_aggregation --single-branch https://github.com/BlackNight95/aws-fluent-plugin-kinesis.git
     cd aws-fluent-plugin-kinesis
     bundle install
     bundle exec rake build
-    fluent-gem install pkg/fluent-plugin-kinesis
+    fluent-gem install pkg/fluent-plugin-kinesis-modified
 
 Or just download specify your Ruby library path. Below is the sample for specifying your library path via RUBYLIB.
 
-    git clone https://github.com/awslabs/aws-fluent-plugin-kinesis.git
+    git clone -b feature_modified_aggregation --single-branch https://github.com/BlackNight95/aws-fluent-plugin-kinesis.git
     cd aws-fluent-plugin-kinesis
     bundle install
     export RUBYLIB=$RUBYLIB:/path/to/aws-fluent-plugin-kinesis/lib
@@ -92,15 +93,15 @@ For more details, see [Configuration: kinesis_streams](#configuration-kinesis_st
     </match>
 For more details, see [Configuration: kinesis_firehose](#configuration-kinesis_firehose).
 
-### kinesis_streams_aggregated
+### kinesis_streams_aggregated/kinesis_streams_aggregated_modified
     <match your_tag>
-      @type kinesis_streams_aggregated
+      @type kinesis_streams_aggregated/kinesis_streams_aggregated_modified
       region us-east-1
       stream_name your_stream
       # Unlike kinesis_streams, there is no way to use dynamic partition key.
       # fixed_partition_key or random.
     </match>
-For more details, see [Configuration: kinesis_streams_aggregated](#configuration-kinesis_streams_aggregated).
+For more details, see [Configuration: kinesis_streams_aggregated](#configuration-kinesis_streams_aggregated) and [Configuration: kinesis_streams_aggregated_modified](#configuration-kinesis_streams_aggregated_modified).
 
 ### For better throughput
 Add configurations like below:
@@ -346,8 +347,9 @@ Default:
 - `kinesis_streams`: 500
 - `kinesis_firehose`: 500
 - `kinesis_streams_aggregated`: 100,000
+- `kinesis_streams_aggregated_modified`: 100,000
 
-### batch_request_max_size
+### size_kb_per_record
 Integer. The number of max size of making batch request from record chunk. It can't exceed the default value because it's API limit.
 
 Default:
@@ -355,6 +357,7 @@ Default:
 - `kinesis_streams`: 5 MB
 - `kinesis_firehose`: 4 MB
 - `kinesis_streams_aggregated`: 1 MB
+- `kinesis_streams_aggregated_modified`: 1 MB
 
 ## Configuration: kinesis_streams
 Here are `kinesis_streams` specific configurations.
@@ -385,6 +388,21 @@ Name of the stream to put data.
 A value of fixed partition key. Default `nil`, which means partition key will be generated randomly.
 
 Note: if you specified this option, all records go to a single shard.
+
+## Configuration: kinesis_streams_aggregated_modified
+Here are `kinesis_streams_aggregated_modified` specific configurations.
+
+### stream_name
+Name of the stream to put data.
+
+### fixed_partition_key
+A value of fixed partition key. Default `nil`, which means partition key will be generated randomly.
+
+Note: if you specified this option, all records go to a single shard.
+
+### max_records_per_call
+Integer. Max number of records sent to kinesis with put_records method in each iteration. max_records_per_call * size_kb_per_record should not exceed 5 MB.
+
 
 ## Development
 
