@@ -23,7 +23,7 @@ module Fluent
 
       RequestType = :streams_aggregated
       BatchRequestLimitCount = 100_000
-      BatchRequestLimitSize  = 1024 * 1024 # 128*1024
+      BatchRequestLimitSize  = 1024 * 1024
       include KinesisHelper::API::BatchRequest
 
       config_param :stream_name, :string
@@ -32,7 +32,7 @@ module Fluent
       def configure(conf)
         super
         @partition_key_generator = create_partition_key_generator
-        @batch_request_max_size -= offset
+        @size_kb_per_record -= offset
         @max_record_size -= offset
       end
 

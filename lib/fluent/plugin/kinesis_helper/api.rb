@@ -43,7 +43,7 @@ module Fluent
             config_param :retries_on_batch_request, :integer, default: 8
             config_param :reset_backoff_if_success, :bool,    default: true
             config_param :batch_request_max_count,  :integer, default: nil
-            config_param :batch_request_max_size,   :integer, default: nil
+            config_param :size_kb_per_record,   :integer, default: nil
           end
 
           def self.included(mod)
@@ -57,10 +57,13 @@ module Fluent
             elsif @batch_request_max_count > self.class::BatchRequestLimitCount
               raise ConfigError, "batch_request_max_count can't be grater than #{self.class::BatchRequestLimitCount}."
             end
-            if @batch_request_max_size.nil?
-              @batch_request_max_size = self.class::BatchRequestLimitSize
-            elsif @batch_request_max_size > self.class::BatchRequestLimitSize
-              raise ConfigError, "batch_request_max_size can't be grater than #{self.class::BatchRequestLimitSize}."
+            if @size_kb_per_record.nil?
+              @size_kb_per_record = self.class::BatchRequestLimitSize
+            else
+              @size_kb_per_record *= 1024
+              if @size_kb_per_record > self.class::BatchRequestLimitSize
+                raise ConfigError, "size_kb_per_record can't be grater than #{self.class::BatchRequestLimitSize}."
+              end
             end
           end
 
@@ -75,7 +78,7 @@ module Fluent
             size = 0
             records.each do |record|
               record_size = size_of_values(record)
-              if (batch.size+1 > @batch_request_max_count or size+record_size > @batch_request_max_size) and batch.size > 0
+              if (batch.size+1 > @batch_request_max_count or size+record_size > @size_kb_per_record) and batch.size > 0
                 yield(batch, size)
                 batch = []
                 size = 0
