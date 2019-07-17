@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 3.1.1
+
+- Enhancement - Modify `kinesis_streams_aggregated` to improve throughput efficiency
+- Enhancement - Change parameter name batch_request_max_size to size_kb_per_record
+- Enhancement - Add max_records_per_call parameter
+- Bug - Fix empty batch error in split_to_batches in api.rb
+
 ## 3.1.0
 
 - Feature - Add process_credentials configuration : [#178](https://github.com/awslabs/aws-fluent-plugin-kinesis/pull/178)
