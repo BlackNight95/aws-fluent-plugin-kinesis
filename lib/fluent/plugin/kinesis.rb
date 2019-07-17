@@ -71,6 +71,7 @@ module Fluent
       end
 
       config_param :debug, :bool, default: false
+      config_param :max_records_per_call, :integer, default: 128
 
       helpers :formatter, :inject
 
@@ -141,6 +142,29 @@ module Fluent
             log.debug(sprintf "Write chunk %s / %3d records / %4d KB", unique_id, batch.size, size/1024)
             batch_request_with_retry(batch, &block)
             log.debug("Finish writing chunk")
+          end
+        end
+      end
+
+      def write_records_batch2(chunk, &block)
+        unique_id = chunk.dump_unique_id_hex(chunk.unique_id)
+        chunk.open do |io|
+          records = msgpack_unpacker(io).to_enum
+          batches = []
+          sizes = []
+          split_to_batches(records) do |batch, size|
+            batches << batch
+            sizes << size            
+          end
+          (0..batches.size).step(@max_records_per_call) do |i|
+            batches_slice = batches[i..i+@max_records_per_call-1]
+            size = sizes[i..i+@max_records_per_call-1].inject(:+)
+            batches_size = batches_slice.map(&:size).inject(:+)
+            if not size.nil?
+              log.debug(sprintf "Write chunk %s / %3d batches / %3d records / %4d KB", unique_id, batches_slice.size, batches_size, size/1024)
+              batch_request_with_retry(batches_slice, &block)
+              log.debug("Finish writing chunk")
+            end
           end
         end
       end

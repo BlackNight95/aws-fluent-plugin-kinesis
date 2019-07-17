@@ -23,7 +23,7 @@ module Fluent
 
       RequestType = :streams_aggregated
       BatchRequestLimitCount = 100_000
-      BatchRequestLimitSize  = 1024 * 1024
+      BatchRequestLimitSize  = 1024 * 1024 # 128*1024
       include KinesisHelper::API::BatchRequest
 
       config_param :stream_name, :string
@@ -42,16 +42,35 @@ module Fluent
         end
       end
 
+      # def write(chunk)
+      #   write_records_batch(chunk) do |batch|
+      #     key = @partition_key_generator.call
+      #     records = batch.map{|(data)|data}
+      #     client.put_records(
+      #       stream_name: @stream_name,
+      #       records: [{
+      #         partition_key: key,
+      #         data: aggregator.aggregate(records, key),
+      #       }],
+      #     )
+      #   end
+      # end
+
       def write(chunk)
-        write_records_batch(chunk) do |batch|
-          key = @partition_key_generator.call
-          records = batch.map{|(data)|data}
+        write_records_batch2(chunk) do |batches|
+          records_to_send = []
+          batches.each do |batch|
+            key = @partition_key_generator.call
+            records = batch.map{|(data)|data}
+            regularized_agg_record = {
+              partition_key: key,
+              data: aggregator.aggregate(records, key)
+            }
+            records_to_send << regularized_agg_record
+          end
           client.put_records(
             stream_name: @stream_name,
-            records: [{
-              partition_key: key,
-              data: aggregator.aggregate(records, key),
-            }],
+            records: records_to_send
           )
         end
       end
