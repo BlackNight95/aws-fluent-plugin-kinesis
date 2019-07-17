@@ -75,7 +75,7 @@ module Fluent
             size = 0
             records.each do |record|
               record_size = size_of_values(record)
-              if batch.size+1 > @batch_request_max_count or size+record_size > @batch_request_max_size
+              if (batch.size+1 > @batch_request_max_count or size+record_size > @batch_request_max_size) and batch.size > 0
                 yield(batch, size)
                 batch = []
                 size = 0
