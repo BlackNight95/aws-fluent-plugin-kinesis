@@ -401,7 +401,7 @@ A value of fixed partition key. Default `nil`, which means partition key will be
 Note: if you specified this option, all records go to a single shard.
 
 ### max_records_per_call
-Integer. Max number of records sent to kinesis with put_records method in each iteration. max_records_per_call * size_kb_per_record should not exceed 5 MB.
+Integer. Max number of aggregated records sent to kinesis with put_records method in each iteration. max_records_per_call * size_kb_per_record should not exceed 5 MB.
 
 
 ## Development
