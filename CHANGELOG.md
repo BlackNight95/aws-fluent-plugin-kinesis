@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 3.1.2
+
+- Enhancement - Reserve `kinesis_streams_aggregated` from 3.1.0
+- Enhancement - Change modified `kinesis_streams_aggregated` name to `kinesis_streams_aggregated_modified`
+
 ## 3.1.1
 
 - Enhancement - Modify `kinesis_streams_aggregated` to improve throughput efficiency
