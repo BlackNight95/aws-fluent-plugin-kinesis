@@ -21,7 +21,7 @@ module Fluent
       Fluent::Plugin.register_output('kinesis_streams_aggregated_modified', self)
       include KinesisHelper::Aggregator::Mixin
 
-      RequestType = :streams_aggregated
+      RequestType = :streams
       BatchRequestLimitCount = 100_000
       BatchRequestLimitSize  = 1024 * 1024
       include KinesisHelper::API::BatchRequest
