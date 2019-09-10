@@ -72,12 +72,14 @@ module Fluent
 
       config_param :debug, :bool, default: false
       config_param :max_records_per_call, :integer, default: 128
+      config_param :max_request_size, :integer, default: 4*1024
 
       helpers :formatter, :inject
 
       def configure(conf)
         super
         @data_formatter = data_formatter_create(conf)
+        @max_request_size *= 1024
       end
 
       def multi_workers_ready?
@@ -153,7 +155,7 @@ module Fluent
           batches = []
           batches_size = 0
           split_to_batches(records) do |batch, size|
-            if (batches.size+1 > @max_records_per_call or batches_size+size > 5*1024*1024) and batches.size > 0
+            if (batches.size+1 > @max_records_per_call or batches_size+size > @max_request_size) and batches.size > 0
               records_number = batches.map(&:size).inject(:+)
               log.debug(sprintf "Write chunk %s / %3d batches / %3d records / %4d KB", unique_id, batches.size, records_number, batches_size/1024)
               batch_request_with_retry(batches, &block)
